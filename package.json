@@ -1,0 +1,15 @@
+{
+  "name": "hostel-finder-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"npm run dev --prefix hostel-finder-frontend\" \"npm start --prefix hostel-finder-backend\"",
+    "start:frontend": "npm run dev --prefix hostel-finder-frontend",
+    "start:backend": "npm start --prefix hostel-finder-backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
+
+
