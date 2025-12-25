@@ -1,1 +1,0 @@
-class Hostel { static findAll() { return []; } } module.exports = Hostel;

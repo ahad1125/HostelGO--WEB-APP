@@ -1,255 +1,298 @@
-# Hostel Finder
+# 🏠 HostelGo - Student Hostel Finder Platform
 
-A full-stack web application for finding and managing hostel listings. Students can search for verified hostels, owners can manage their listings, and admins can verify hostels.
+A full-stack web application for finding and managing student hostels. Built with React, Node.js, and MySQL, featuring role-based access control for Students, Hostel Owners, and Administrators.
 
-## 📋 Project Overview
+![HostelGo](https://img.shields.io/badge/HostelGo-Student%20Hostel%20Finder-blue)
+![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-3178C6?logo=typescript)
 
-This project consists of:
-- **Frontend**: React + TypeScript application with modern UI
-- **Backend**: Node.js + Express.js REST API
-- **Database**: MySQL (migrated from SQLite)
+## ✨ Features
 
-### Features
+### 👨‍🎓 For Students
+- **Browse Verified Hostels** - View only admin-verified hostel listings
+- **Advanced Search** - Filter by city, rent budget, and facilities
+- **Read & Write Reviews** - Share experiences and read authentic student reviews
+- **Send Enquiries** - Contact hostel owners directly
+- **Schedule Visits** - Book appointments to visit hostels
 
-- **Students**: Search and view verified hostels, add reviews
-- **Hostel Owners**: Create, update, and delete hostel listings
-- **Admins**: Verify/unverify hostels, controlling visibility to students
+### 🏢 For Hostel Owners
+- **List Properties** - Add and manage hostel listings
+- **Dashboard** - View all your hostels in one place
+- **Manage Details** - Update hostel information anytime
+- **Track Enquiries** - Respond to student enquiries and schedule visits
+- **Verification Status** - Monitor verification progress
+
+### 👨‍💼 For Administrators
+- **Verify Hostels** - Review and approve hostel submissions
+- **Manage All Listings** - View and manage all hostels on the platform
+- **Analytics Dashboard** - Monitor platform activity
+- **User Management** - Oversee all users and their activities
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- shadcn/ui components
+- **React 18** with TypeScript
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Shadcn UI** - Beautiful component library
+- **React Router** - Client-side routing
+- **React Query** - Data fetching and caching
+- **Next Themes** - Dark/Light mode support
+- **Embla Carousel** - Smooth carousel component
 
 ### Backend
-- Node.js
-- Express.js
-- MySQL (mysql2)
-- CORS
+- **Node.js** with Express.js
+- **MySQL** - Relational database
+- **mysql2/promise** - Async MySQL client
+- **CORS** - Cross-origin resource sharing
+- **JWT-like Authentication** - Custom header-based auth
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm (comes with Node.js)
-- MySQL Server (v5.7 or higher, or MariaDB 10.2+)
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd "Hostel Finder"
-   ```
-
-2. **Install MySQL:**
-   - **Windows:** Download from [MySQL Official Website](https://dev.mysql.com/downloads/mysql/)
-   - **macOS:** `brew install mysql`
-   - **Linux:** `sudo apt-get install mysql-server` (Ubuntu/Debian)
-
-3. **Start MySQL Service:**
-   - **Windows:** MySQL should start automatically
-   - **macOS:** `brew services start mysql`
-   - **Linux:** `sudo systemctl start mysql`
-
-4. **Install All Dependencies (One Command):**
-   ```bash
-   npm install
-   ```
-   
-   This will automatically install dependencies for:
-   - Root project (concurrently for running both servers)
-   - Backend (Express, MySQL, etc.)
-   - Frontend (React, Vite, etc.)
-
-5. **Configure Database Connection:**
-   
-   Open `hostel-finder-backend/database.js` and update if needed:
-   ```javascript
-   const dbConfig = {
-       host: "localhost",
-       user: "root",              // Your MySQL username
-       password: "your_password",  // Your MySQL password (or "" if no password)
-       database: "hostel_finder",  // Database name
-   };
-   ```
-   
-   Or use environment variables (see backend README for details).
-
-6. **Start Both Servers (One Command):**
-   ```bash
-   npm start
-   ```
-   
-   This will start:
-   - **Backend** on `http://localhost:5000` (creates database and tables automatically)
-   - **Frontend** on `http://localhost:5173` (opens in browser automatically)
-   
-   The backend will automatically:
-   - Create the database if it doesn't exist
-   - Create all necessary tables
-   - Seed initial data
+### Architecture
+- **MVC Pattern** - Model-View-Controller architecture
+- **RESTful API** - Clean API design
+- **Role-Based Access Control** - Secure permission system
 
 ## 📁 Project Structure
 
 ```
 Hostel Finder/
-├── hostel-finder-backend/     # Backend API
-│   ├── server.js              # Main server file
-│   ├── database.js            # MySQL connection and schema
-│   ├── controllers/           # Business logic
-│   ├── routes/                # API routes
-│   ├── middleware/            # Auth middleware
-│   └── README.md              # Backend documentation
-│
-├── hostel-finder-frontend/    # Frontend React app
+├── hostel-finder-frontend/     # React frontend application
 │   ├── src/
-│   │   ├── components/        # React components
-│   │   ├── pages/             # Page components
-│   │   ├── contexts/          # React contexts
-│   │   └── lib/                # Utilities
-│   └── README.md              # Frontend documentation
+│   │   ├── components/          # Reusable UI components
+│   │   ├── pages/              # Page components
+│   │   │   ├── admin/          # Admin pages
+│   │   │   ├── owner/          # Owner pages
+│   │   │   ├── student/        # Student pages
+│   │   │   └── auth/           # Authentication pages
+│   │   ├── contexts/           # React contexts
+│   │   ├── hooks/              # Custom React hooks
+│   │   └── lib/                # Utilities and API client
+│   └── package.json
 │
-└── README.md                  # This file
+├── hostel-finder-backend/       # Node.js backend API
+│   ├── config/                 # Configuration files
+│   │   └── database.js         # Database connection
+│   ├── controllers/            # Request handlers
+│   ├── models/                 # Data models
+│   ├── routes/                 # API routes
+│   ├── middleware/             # Express middleware
+│   ├── seed-data.sql           # Database seed data
+│   └── server.js               # Entry point
+│
+└── README.md                   # This file
 ```
 
-## 🔧 Configuration
+## 🚀 Getting Started
 
-### Backend Database Configuration
+### Prerequisites
 
-Edit `hostel-finder-backend/database.js`:
+- **Node.js** (v18 or higher)
+- **MySQL** (v8.0 or higher)
+- **npm** or **yarn**
 
-```javascript
-const dbConfig = {
-    host: process.env.DB_HOST || "localhost",
-    user: process.env.DB_USER || "root",
-    password: process.env.DB_PASSWORD || "",  // Update with your MySQL password
-    database: process.env.DB_NAME || "hostel_finder",
-};
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/hostel-finder.git
+   cd hostel-finder
+   ```
+
+2. **Install Backend Dependencies**
+   ```bash
+   cd hostel-finder-backend
+   npm install
+   ```
+
+3. **Install Frontend Dependencies**
+   ```bash
+   cd ../hostel-finder-frontend
+   npm install
+   ```
+
+### Environment Variables
+
+#### Backend (`.env` in `hostel-finder-backend/`)
+```env
+# Database Configuration
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=hostel_finder
+DB_PORT=3306
+
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+
+# CORS (Optional - for production)
+FRONTEND_URL=http://localhost:8080
 ```
 
-Or use environment variables:
-- `DB_HOST` - MySQL host (default: localhost)
-- `DB_USER` - MySQL username (default: root)
-- `DB_PASSWORD` - MySQL password (default: empty)
-- `DB_NAME` - Database name (default: hostel_finder)
+#### Frontend (`.env` in `hostel-finder-frontend/`)
+```env
+VITE_API_URL=http://localhost:5000
+```
 
-### Frontend API Configuration
+### Database Setup
 
-The frontend connects to the backend API. Make sure the backend URL in `hostel-finder-frontend/src/lib/api.ts` matches your backend server URL (default: `http://localhost:5000`).
+1. **Create MySQL Database**
+   ```sql
+   CREATE DATABASE hostel_finder;
+   ```
 
-## 📝 Available Scripts
+2. **Run Seed Data (Optional)**
+   ```bash
+   mysql -u root -p hostel_finder < hostel-finder-backend/seed-data.sql
+   ```
+   
+   Or manually import `seed-data.sql` through MySQL Workbench/phpMyAdmin.
 
-From the root directory:
+3. **Database Tables** - Tables are automatically created on server start:
+   - `users` - User accounts (students, owners, admins)
+   - `hostels` - Hostel listings
+   - `reviews` - Student reviews
+   - `enquiries` - Student enquiries
+   - `bookings` - Booking records
 
-- `npm install` - Install all dependencies (root, backend, and frontend)
-- `npm start` - Start both backend and frontend servers simultaneously
-- `npm run start:backend` - Start only the backend server
-- `npm run start:frontend` - Start only the frontend server
-- `npm run build` - Build the frontend for production
+### Running the Application
 
-## 📊 Database Schema
+#### Development Mode
 
-The application uses MySQL with the following tables:
+1. **Start Backend Server**
+   ```bash
+   cd hostel-finder-backend
+   npm start
+   ```
+   Server runs on `http://localhost:5000`
 
-1. **users** - User accounts (students, owners, admins)
-2. **hostels** - Hostel listings
-3. **reviews** - Student reviews for hostels
-4. **bookings** - Booking records
+2. **Start Frontend Development Server**
+   ```bash
+   cd hostel-finder-frontend
+   npm run dev
+   ```
+   Frontend runs on `http://localhost:8080`
 
-See `hostel-finder-backend/README.md` for detailed schema information.
+#### Production Build
 
-## 🔐 Default Accounts
+1. **Build Frontend**
+   ```bash
+   cd hostel-finder-frontend
+   npm run build
+   ```
 
-After seeding, the following accounts are available:
+2. **Start Backend**
+   ```bash
+   cd hostel-finder-backend
+   npm start
+   ```
 
-- **Admin:**
-  - Email: `admin.pk@example.com`
-  - Password: `admin123`
+## 📡 API Endpoints
 
-- **Student:**
-  - Email: `ahad@gmail.com`
-  - Password: `1234`
+### Authentication
+- `POST /auth/signup` - Register new user
+- `POST /auth/login` - User login
 
-- **Owners:**
-  - Email: `ali.owner@example.com`, `sara.owner@example.com`, `usman.owner@example.com`
-  - Password: `password123`
+### Hostels
+- `GET /hostels/public` - Get verified hostels (public)
+- `GET /hostels` - Get hostels (role-based)
+- `GET /hostels/:id` - Get hostel details
+- `GET /hostels/search` - Search hostels
+- `POST /hostels` - Create hostel (owners only)
+- `PUT /hostels/:id` - Update hostel (owners only)
+- `DELETE /hostels/:id` - Delete hostel (owners only)
 
-## 📡 API Documentation
+### Reviews
+- `POST /reviews` - Create review (students only)
+- `GET /reviews/hostel/:hostelId` - Get reviews for hostel
+- `PUT /reviews/:id` - Update review
+- `DELETE /reviews/:id` - Delete review
 
-Full API documentation is available in:
-- `hostel-finder-backend/README.md` - Complete API reference
-- `hostel-finder-backend/API_REFERENCE.md` - API endpoint details
+### Enquiries
+- `POST /enquiries` - Create enquiry (students only)
+- `GET /enquiries/owner` - Get owner's enquiries
+- `GET /enquiries/student` - Get student's enquiries
+- `PUT /enquiries/:id/reply` - Reply to enquiry (owners only)
 
-## 🧪 Testing
+### Admin
+- `GET /admin/hostels` - Get all hostels
+- `PUT /admin/verify-hostel/:id` - Verify hostel
+- `PUT /admin/unverify-hostel/:id` - Unverify hostel
 
-### Backend Testing
+## 🎨 Features Showcase
 
-See `hostel-finder-backend/TESTING_GUIDE.md` for testing instructions.
+### 🎯 Smart Search
+Filter hostels by city, maximum rent, and facilities with an intuitive search interface.
 
-### Manual Testing
+### ✅ Verified Listings
+All hostels are verified by administrators before being visible to students, ensuring authenticity.
 
-1. Start both backend and frontend servers
-2. Open `http://localhost:5173` in your browser
-3. Use the default accounts to test different user roles
+### ⭐ Student Reviews
+Read and write genuine reviews from fellow students to make informed decisions.
 
-## 🐛 Troubleshooting
+### 🌓 Dark Mode
+Beautiful dark/light theme toggle with smooth transitions.
 
-### Backend Issues
+### 📱 Responsive Design
+Fully responsive design that works seamlessly on desktop, tablet, and mobile devices.
 
-- **MySQL Connection Error:**
-  - Ensure MySQL is running
-  - Check database credentials in `database.js`
-  - Verify MySQL user has proper permissions
+## 🚢 Deployment
 
-- **Port Already in Use:**
-  - Change port in `server.js` or stop the process using port 5000
+### Frontend (Vercel)
+1. Connect your GitHub repository to Vercel
+2. Set build command: `npm run build`
+3. Set output directory: `dist`
+4. Add environment variable: `VITE_API_URL=https://your-backend-url.com`
 
-### Frontend Issues
+### Backend (Railway)
+1. Connect your GitHub repository to Railway
+2. Set root directory: `hostel-finder-backend`
+3. Add environment variables:
+   - `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_PORT`
+   - `PORT` (auto-set by Railway)
+   - `NODE_ENV=production`
 
-- **API Connection Error:**
-  - Ensure backend is running on `http://localhost:5000`
-  - Check CORS settings in backend
-  - Verify API URL in frontend configuration
+### Database (Railway MySQL)
+1. Create MySQL service on Railway
+2. Copy connection variables to backend environment variables
+3. Database tables are auto-created on first deployment
 
-### Database Issues
+## 👥 Default Accounts
 
-- **Tables Not Created:**
-  - Check MySQL user permissions
-  - Review error logs in console
-  - Ensure database can be created
+After seeding the database, you can use:
 
-## 🔄 Migration Notes
+- **Admin**: `admin.pk@example.com` / `admin123`
+- **Student**: Create via signup
+- **Owner**: Create via signup
 
-This project was migrated from SQLite to MySQL. Key changes:
+## 🤝 Contributing
 
-- Database driver changed from `sqlite3` to `mysql2`
-- Query syntax updated to MySQL (AUTO_INCREMENT, ENUM, etc.)
-- Callback-based queries converted to async/await
-- Connection pooling implemented for better performance
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📝 Development Notes
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-- **Password Storage:** Currently uses plain text (prototype only)
-- **Authentication:** Simple email/password (no JWT/sessions)
-- **CORS:** Enabled for all origins (adjust for production)
+## 📝 License
 
-## 📄 License
+This project is licensed under the MIT License.
 
-This is an academic project prototype.
+## 🙏 Acknowledgments
 
-## 👥 Contributing
+- Built with [React](https://react.dev/)
+- UI components from [Shadcn UI](https://ui.shadcn.com/)
+- Icons from [Lucide React](https://lucide.dev/)
+- Styling with [Tailwind CSS](https://tailwindcss.com/)
 
-This is a university project. For questions or issues, please contact the project maintainers.
+## 📧 Contact
 
-## 📚 Additional Documentation
+For questions or support, please open an issue on GitHub.
 
-- Backend: `hostel-finder-backend/README.md`
-- Frontend: `hostel-finder-frontend/README.md`
-- API Reference: `hostel-finder-backend/API_REFERENCE.md`
-- Testing Guide: `hostel-finder-backend/TESTING_GUIDE.md`
+---
+
+**Made with ❤️ for students finding their perfect home away from home**
 
