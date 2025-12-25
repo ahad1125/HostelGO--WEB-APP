@@ -87,18 +87,26 @@ const HostelDetail = () => {
   const fetchHostelData = async () => {
     setIsLoading(true);
     try {
+      console.log("🔄 HostelDetail: Fetching hostel ID:", id);
       const [hostelData, reviewsData] = await Promise.all([
         hostelApi.getById(parseInt(id!)),
         reviewApi.getByHostel(parseInt(id!))
       ]);
+      console.log("✅ HostelDetail: Received hostel data:", hostelData.name || hostelData.id);
+      console.log("✅ HostelDetail: Received", reviewsData.length, "reviews");
       setHostel(hostelData);
-      setReviews(reviewsData);
+      setReviews(Array.isArray(reviewsData) ? reviewsData : []);
     } catch (error: any) {
+      console.error("❌ HostelDetail: Error fetching data:", error);
       toast({
         title: "Error loading hostel",
         description: error.message || "Failed to fetch hostel details",
         variant: "destructive",
       });
+      // Navigate back if hostel not found
+      if (error.message?.includes("404") || error.message?.includes("not found")) {
+        setTimeout(() => navigate("/student/hostels"), 2000);
+      }
     } finally {
       setIsLoading(false);
     }

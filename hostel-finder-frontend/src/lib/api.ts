@@ -179,16 +179,35 @@ export const hostelApi = {
   },
 
   getById: async (id: number): Promise<Hostel> => {
-    const response = await fetch(`${API_BASE_URL}/hostels/${id}`, {
-      headers: getAuthHeaders(),
-    });
-    if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ error: "Hostel not found" }));
-      throw new Error(error.error || "Hostel not found");
+    const url = `${API_BASE_URL}/hostels/${id}`;
+    console.log("🌐 Fetching hostel by ID:", id, "from:", url);
+    
+    try {
+      const response = await fetch(url, {
+        headers: getAuthHeaders(),
+      });
+      
+      console.log("📡 Response status:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Error response:", errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { error: errorText || `Failed to fetch hostel (${response.status})` };
+        }
+        throw new Error(error.error || `Failed to fetch hostel (${response.status})`);
+      }
+      
+      const data = await response.json();
+      console.log("✅ Received hostel data:", data.name || data.id);
+      return data;
+    } catch (error: any) {
+      console.error("❌ Fetch error in getById:", error);
+      throw error;
     }
-    return response.json();
   },
 
   create: async (

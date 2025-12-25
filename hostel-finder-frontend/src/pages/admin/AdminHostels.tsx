@@ -51,15 +51,15 @@ const AdminHostels = () => {
 
   const transformHostel = (hostel: ApiHostel): HostelCardType => ({
     id: hostel.id.toString(),
-    name: hostel.name,
-    city: hostel.city,
-    address: hostel.address,
-    rent: hostel.rent,
+    name: hostel.name || 'Unnamed Hostel',
+    city: hostel.city || 'Unknown',
+    address: hostel.address || 'Address not available',
+    rent: hostel.rent || 0,
     rating: 4.5, // Backend doesn't store rating yet
-    facilities: hostel.facilities.split(",").map((f) => f.trim()).filter(Boolean),
+    facilities: hostel.facilities ? hostel.facilities.split(",").map((f) => f.trim()).filter(Boolean) : [],
     image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800",
     isVerified: hostel.is_verified === 1,
-    ownerId: hostel.owner_id.toString(),
+    ownerId: hostel.owner_id?.toString() || '0',
   });
 
   const allHostels: HostelCardType[] = hostels.map(transformHostel);
