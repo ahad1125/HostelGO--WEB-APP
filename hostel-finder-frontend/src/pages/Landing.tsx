@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { PolicyDialogs } from "@/components/PolicyDialogs";
 import HostelCarousel from "@/components/HostelCarousel";
-import ThemeToggle from "@/components/ThemeToggle";
 
 const Landing = () => {
   const features = [
@@ -40,9 +39,6 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background relative">
       <Navbar />
-      
-      {/* Floating Theme Toggle */}
-      <ThemeToggle variant="floating" />
 
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 px-4 overflow-hidden">

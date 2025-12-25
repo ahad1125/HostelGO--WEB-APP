@@ -3,6 +3,7 @@ import { Building2, Menu, X, LogOut, User, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -51,7 +52,7 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             <Link 
               to="/" 
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 relative group"
@@ -59,6 +60,9 @@ const Navbar = () => {
               Home
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-200"></span>
             </Link>
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
             
             {!isLoggedIn ? (
               <>
@@ -140,6 +144,13 @@ const Navbar = () => {
               >
                 Home
               </Link>
+              
+              {/* Theme Toggle in Mobile */}
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-sm font-medium text-muted-foreground">Theme</span>
+                <ThemeToggle />
+              </div>
+              
               {!isLoggedIn ? (
                 <>
                   <Link to="/login" className="px-4 py-3" onClick={() => setMobileMenuOpen(false)}>
