@@ -1,4 +1,4 @@
-const Hostel = require("../models/Hostel");
+const Hostel = require("../models/hostel");
 
 /**
  * HOSTEL CONTROLLER
@@ -21,7 +21,7 @@ const getAllHostels = async (req, res) => {
 
     try {
         const filters = {};
-        
+
         // Role-based filtering
         if (user.role === 'student') {
             // Students can only see verified hostels
@@ -39,8 +39,8 @@ const getAllHostels = async (req, res) => {
     } catch (err) {
         console.error("Error in getAllHostels:", err.message);
         console.error("Full error:", err);
-        return res.status(500).json({ 
-            error: "Database error", 
+        return res.status(500).json({
+            error: "Database error",
             details: err.message,
             stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
         });
@@ -140,8 +140,8 @@ const createHostel = async (req, res) => {
 
     // Validate required fields
     if (!name || !address || !city || !rent) {
-        return res.status(400).json({ 
-            error: "Name, address, city, and rent are required" 
+        return res.status(400).json({
+            error: "Name, address, city, and rent are required"
         });
     }
 
