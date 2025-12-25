@@ -82,6 +82,24 @@ app.get("/debug/db-status", async (req, res) => {
         const [userCount] = await db.query("SELECT COUNT(*) as count FROM users");
         const [hostelCount] = await db.query("SELECT COUNT(*) as count FROM hostels");
         
+        // Test the actual query that students use
+        let studentQueryTest = null;
+        try {
+            const [studentHostels] = await db.query("SELECT * FROM hostels WHERE is_verified = 1 ORDER BY id DESC");
+            studentQueryTest = {
+                success: true,
+                count: studentHostels.length,
+                query: "SELECT * FROM hostels WHERE is_verified = 1 ORDER BY id DESC"
+            };
+        } catch (queryErr) {
+            studentQueryTest = {
+                success: false,
+                error: queryErr.message,
+                code: queryErr.code,
+                sqlState: queryErr.sqlState
+            };
+        }
+        
         res.json({
             status: "connected",
             connectionTest: result[0],
@@ -90,6 +108,7 @@ app.get("/debug/db-status", async (req, res) => {
                 users: userCount[0].count,
                 hostels: hostelCount[0].count
             },
+            studentQueryTest: studentQueryTest,
             config: {
                 host: process.env.DB_HOST || process.env.MYSQLHOST || "not set",
                 user: process.env.DB_USER || process.env.MYSQLUSER || "not set",
