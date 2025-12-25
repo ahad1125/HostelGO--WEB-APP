@@ -1,5 +1,6 @@
 const Review = require("../models/Review");
 const Hostel = require("../models/Hostel");
+const db = require("../config/database"); // Import db directly for reliable queries
 
 /**
  * REVIEW CONTROLLER
@@ -35,18 +36,32 @@ const createReview = async (req, res) => {
     }
 
     try {
-        // Check if hostel exists and is verified (students can only review verified hostels)
-        const hostel = await Hostel.findById(parseInt(hostel_id));
+        console.log("🔍 Creating review for hostel:", hostel_id, "by student:", user.id);
+        
+        // Check if hostel exists and is verified using direct query
+        const [hostelRows] = await db.query(
+            `SELECT h.*, u.name as owner_name
+             FROM hostels h
+             JOIN users u ON h.owner_id = u.id
+             WHERE h.id = ?`,
+            [parseInt(hostel_id)]
+        );
 
-        if (!hostel) {
+        if (!hostelRows || hostelRows.length === 0) {
+            console.log("❌ Hostel not found:", hostel_id);
             return res.status(404).json({ error: "Hostel not found" });
         }
 
+        const hostel = hostelRows[0];
+        console.log("✅ Found hostel:", hostel.name, "is_verified:", hostel.is_verified);
+
         if (user.role === 'student' && hostel.is_verified !== 1) {
+            console.log("🚫 Student cannot review unverified hostel");
             return res.status(403).json({ error: "You can only review verified hostels" });
         }
 
         // Create new review
+        console.log("📝 Creating review with rating:", rating, "comment:", comment?.substring(0, 50));
         const review = await Review.create({
             rating: parseInt(rating),
             comment: comment || '',
@@ -54,12 +69,22 @@ const createReview = async (req, res) => {
             student_id: user.id
         });
 
+        console.log("✅ Review created successfully:", review.id);
         res.status(201).json({
             message: "Review created successfully",
             review
         });
     } catch (err) {
-        return res.status(500).json({ error: "Failed to create review", details: err.message });
+        console.error("❌ Error in createReview:", err.message);
+        console.error("Error code:", err.code);
+        console.error("Error SQL state:", err.sqlState);
+        console.error("Stack:", err.stack);
+        return res.status(500).json({ 
+            error: "Failed to create review", 
+            details: err.message,
+            code: err.code,
+            sqlState: err.sqlState
+        });
     }
 };
 

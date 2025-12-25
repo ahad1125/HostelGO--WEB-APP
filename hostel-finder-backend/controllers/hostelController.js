@@ -90,11 +90,32 @@ const getAllHostels = async (req, res) => {
         }
 
         console.log("📝 Using filters:", filters);
-        const hostels = await Hostel.findAll(filters);
+        
+        // For owners and admins, use direct query instead of model method
+        let query = `SELECT h.*, u.name as owner_name, u.email as owner_email,
+                            COALESCE(u.contact_number, '') as owner_contact_number
+                     FROM hostels h
+                     JOIN users u ON h.owner_id = u.id`;
+        const conditions = [];
+        const values = [];
+
+        if (filters.owner_id) {
+            conditions.push("h.owner_id = ?");
+            values.push(filters.owner_id);
+        }
+
+        if (conditions.length > 0) {
+            query += ` WHERE ${conditions.join(" AND ")}`;
+        }
+
+        query += " ORDER BY h.id DESC";
+        
+        const [rows] = await db.query(query, values);
+        const hostels = Array.isArray(rows) ? rows : [];
         console.log("✅ Found", hostels.length, "hostels");
         
         // Return empty array if no hostels (this is valid, not an error)
-        return res.json(Array.isArray(hostels) ? hostels : []);
+        return res.json(hostels);
     } catch (err) {
         console.error("❌ Error in getAllHostels:", err.message);
         console.error("Error code:", err.code);
@@ -129,34 +150,65 @@ const searchHostels = async (req, res) => {
     const { city, maxRent, facility } = req.query;
 
     try {
-        // Build filters object
-        const filters = {};
+        console.log("🔍 Searching hostels for user:", user.role, "filters:", { city, maxRent, facility });
+        
+        // Build query with direct database access
+        let query = `SELECT h.*, u.name as owner_name, u.email as owner_email,
+                            COALESCE(u.contact_number, '') as owner_contact_number
+                     FROM hostels h
+                     JOIN users u ON h.owner_id = u.id`;
+        const conditions = [];
+        const values = [];
 
         // Role-based base filtering
         if (user.role === 'student') {
-            filters.is_verified = 1;
+            conditions.push("h.is_verified = 1");
         } else if (user.role === 'owner') {
-            filters.owner_id = user.id;
+            conditions.push("h.owner_id = ?");
+            values.push(user.id);
         }
+        // Admins see all (no base filter)
 
         // Add search filters
         if (city) {
-            filters.city = city;
+            conditions.push("h.city LIKE ?");
+            values.push(`%${city}%`);
         }
 
         if (maxRent) {
-            filters.maxRent = maxRent;
+            conditions.push("h.rent <= ?");
+            values.push(parseInt(maxRent));
         }
 
         if (facility) {
-            filters.facility = facility;
+            conditions.push("LOWER(h.facilities) LIKE ?");
+            values.push(`%${facility.toLowerCase()}%`);
         }
 
-        // Use Hostel model to find hostels with filters
-        const hostels = await Hostel.findAll(filters);
+        if (conditions.length > 0) {
+            query += ` WHERE ${conditions.join(" AND ")}`;
+        }
+
+        query += " ORDER BY h.id DESC";
+        
+        console.log("📝 Executing search query:", query);
+        console.log("With values:", values);
+        
+        const [rows] = await db.query(query, values);
+        const hostels = Array.isArray(rows) ? rows : [];
+        
+        console.log("✅ Found", hostels.length, "hostels");
         res.json(hostels);
     } catch (err) {
-        return res.status(500).json({ error: "Database error", details: err.message });
+        console.error("❌ Error in searchHostels:", err.message);
+        console.error("Error code:", err.code);
+        console.error("Error SQL state:", err.sqlState);
+        return res.status(500).json({ 
+            error: "Database error", 
+            details: err.message,
+            code: err.code,
+            sqlState: err.sqlState
+        });
     }
 };
 
@@ -274,38 +326,79 @@ const updateHostel = async (req, res) => {
     const { name, address, city, rent, facilities } = req.body;
 
     try {
-        // First, check if hostel exists and belongs to user
-        const hostel = await Hostel.findById(parseInt(hostelId));
+        console.log("🔍 Updating hostel:", hostelId, "by owner:", user.id);
+        
+        // First, check if hostel exists and belongs to user using direct query
+        const [hostelRows] = await db.query(
+            `SELECT h.*, u.name as owner_name
+             FROM hostels h
+             JOIN users u ON h.owner_id = u.id
+             WHERE h.id = ?`,
+            [parseInt(hostelId)]
+        );
 
-        if (!hostel) {
+        if (!hostelRows || hostelRows.length === 0) {
+            console.log("❌ Hostel not found:", hostelId);
             return res.status(404).json({ error: "Hostel not found" });
         }
 
+        const hostel = hostelRows[0];
+
         if (hostel.owner_id !== user.id) {
+            console.log("🚫 Owner cannot update other's hostel");
             return res.status(403).json({ error: "You can only update your own hostels" });
         }
 
         // Build updates object
-        const updates = {};
-        if (name !== undefined) updates.name = name;
-        if (address !== undefined) updates.address = address;
-        if (city !== undefined) updates.city = city;
+        const updates = [];
+        const values = [];
+        
+        if (name !== undefined) {
+            updates.push("name = ?");
+            values.push(name);
+        }
+        if (address !== undefined) {
+            updates.push("address = ?");
+            values.push(address);
+        }
+        if (city !== undefined) {
+            updates.push("city = ?");
+            values.push(city);
+        }
         if (rent !== undefined) {
             if (isNaN(rent) || rent <= 0) {
                 return res.status(400).json({ error: "Rent must be a positive number" });
             }
-            updates.rent = rent;
+            updates.push("rent = ?");
+            values.push(parseInt(rent));
         }
-        if (facilities !== undefined) updates.facilities = facilities;
+        if (facilities !== undefined) {
+            updates.push("facilities = ?");
+            values.push(facilities);
+        }
 
-        if (Object.keys(updates).length === 0) {
+        if (updates.length === 0) {
             return res.status(400).json({ error: "No fields to update" });
         }
 
-        await Hostel.updateById(parseInt(hostelId), updates);
+        values.push(parseInt(hostelId));
+        await db.query(
+            `UPDATE hostels SET ${updates.join(", ")} WHERE id = ?`,
+            values
+        );
+        
+        console.log("✅ Hostel updated successfully");
         res.json({ message: "Hostel updated successfully" });
     } catch (err) {
-        return res.status(500).json({ error: "Failed to update hostel", details: err.message });
+        console.error("❌ Error in updateHostel:", err.message);
+        console.error("Error code:", err.code);
+        console.error("Error SQL state:", err.sqlState);
+        return res.status(500).json({ 
+            error: "Failed to update hostel", 
+            details: err.message,
+            code: err.code,
+            sqlState: err.sqlState
+        });
     }
 };
 
@@ -319,23 +412,44 @@ const deleteHostel = async (req, res) => {
     const hostelId = req.params.id;
 
     try {
-        // First, check if hostel exists and belongs to user
-        const hostel = await Hostel.findById(parseInt(hostelId));
+        console.log("🔍 Deleting hostel:", hostelId, "by owner:", user.id);
+        
+        // First, check if hostel exists and belongs to user using direct query
+        const [hostelRows] = await db.query(
+            `SELECT h.*, u.name as owner_name
+             FROM hostels h
+             JOIN users u ON h.owner_id = u.id
+             WHERE h.id = ?`,
+            [parseInt(hostelId)]
+        );
 
-        if (!hostel) {
+        if (!hostelRows || hostelRows.length === 0) {
+            console.log("❌ Hostel not found:", hostelId);
             return res.status(404).json({ error: "Hostel not found" });
         }
 
+        const hostel = hostelRows[0];
+
         if (hostel.owner_id !== user.id) {
+            console.log("🚫 Owner cannot delete other's hostel");
             return res.status(403).json({ error: "You can only delete your own hostels" });
         }
 
-        // Delete the hostel
-        await Hostel.deleteById(parseInt(hostelId));
+        // Delete the hostel using direct query
+        await db.query("DELETE FROM hostels WHERE id = ?", [parseInt(hostelId)]);
 
+        console.log("✅ Hostel deleted successfully");
         res.json({ message: "Hostel deleted successfully" });
     } catch (err) {
-        return res.status(500).json({ error: "Failed to delete hostel", details: err.message });
+        console.error("❌ Error in deleteHostel:", err.message);
+        console.error("Error code:", err.code);
+        console.error("Error SQL state:", err.sqlState);
+        return res.status(500).json({ 
+            error: "Failed to delete hostel", 
+            details: err.message,
+            code: err.code,
+            sqlState: err.sqlState
+        });
     }
 };
 
