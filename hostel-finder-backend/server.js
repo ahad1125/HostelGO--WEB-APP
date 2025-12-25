@@ -66,6 +66,56 @@ app.get("/", (req, res) => {
 });
 
 // =====================
+// Debug Route - Database Status
+// =====================
+app.get("/debug/db-status", async (req, res) => {
+    const db = require("./config/database");
+    try {
+        // Test connection
+        const [result] = await db.query("SELECT 1 as test");
+        
+        // Check tables
+        const [tables] = await db.query("SHOW TABLES");
+        const tableNames = tables.map(t => Object.values(t)[0]);
+        
+        // Count records
+        const [userCount] = await db.query("SELECT COUNT(*) as count FROM users");
+        const [hostelCount] = await db.query("SELECT COUNT(*) as count FROM hostels");
+        
+        res.json({
+            status: "connected",
+            connectionTest: result[0],
+            tables: tableNames,
+            counts: {
+                users: userCount[0].count,
+                hostels: hostelCount[0].count
+            },
+            config: {
+                host: process.env.DB_HOST || process.env.MYSQLHOST || "not set",
+                user: process.env.DB_USER || process.env.MYSQLUSER || "not set",
+                database: process.env.DB_NAME || process.env.MYSQLDATABASE || "not set",
+                port: process.env.DB_PORT || process.env.MYSQLPORT || "not set",
+                hasPassword: !!(process.env.DB_PASSWORD || process.env.MYSQLPASSWORD)
+            }
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: "error",
+            error: err.message,
+            code: err.code,
+            sqlState: err.sqlState,
+            config: {
+                host: process.env.DB_HOST || process.env.MYSQLHOST || "not set",
+                user: process.env.DB_USER || process.env.MYSQLUSER || "not set",
+                database: process.env.DB_NAME || process.env.MYSQLDATABASE || "not set",
+                port: process.env.DB_PORT || process.env.MYSQLPORT || "not set",
+                hasPassword: !!(process.env.DB_PASSWORD || process.env.MYSQLPASSWORD)
+            }
+        });
+    }
+});
+
+// =====================
 // Routes
 // =====================
 app.use("/auth", authRoutes);

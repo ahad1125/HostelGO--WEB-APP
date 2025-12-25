@@ -38,10 +38,14 @@ const getAllHostels = async (req, res) => {
         res.json(hostels);
     } catch (err) {
         console.error("Error in getAllHostels:", err.message);
+        console.error("Error code:", err.code);
+        console.error("Error SQL state:", err.sqlState);
         console.error("Full error:", err);
         return res.status(500).json({
             error: "Database error",
             details: err.message,
+            code: err.code,
+            sqlState: err.sqlState,
             stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
         });
     }

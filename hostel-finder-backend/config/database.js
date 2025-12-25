@@ -24,8 +24,40 @@ console.log("🔧 Database Config:", {
 
 const pool = mysql.createPool(dbConfig);
 
+// Add error handler for pool
+pool.on('connection', (connection) => {
+    console.log('🔌 New MySQL connection established');
+});
+
+pool.on('error', (err) => {
+    console.error('❌ MySQL pool error:', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+        console.error('Database connection was lost.');
+    }
+    if (err.code === 'ECONNREFUSED') {
+        console.error('Database connection was refused. Check if MySQL is running.');
+    }
+});
+
+// Test database connection
+async function testConnection() {
+    try {
+        const connection = await pool.getConnection();
+        await connection.query("SELECT 1 as test");
+        connection.release();
+        console.log("✅ Database connection test successful");
+        return true;
+    } catch (err) {
+        console.error("❌ Database connection test failed:", err.message);
+        throw err;
+    }
+}
+
 // Initialize tables ONLY (no DB creation)
 async function initializeDatabase() {
+    // First test the connection
+    await testConnection();
+    
     const connection = await pool.getConnection();
     try {
         // USERS
@@ -112,8 +144,15 @@ async function initializeDatabase() {
         }
 
         console.log("✅ Database initialized on Railway");
+        
+        // Verify tables exist
+        const [tables] = await connection.query("SHOW TABLES");
+        console.log("📊 Tables created:", tables.map(t => Object.values(t)[0]).join(", "));
+        
     } catch (err) {
         console.error("❌ DB init failed:", err);
+        console.error("Error code:", err.code);
+        console.error("Error SQL state:", err.sqlState);
         throw err;
     } finally {
         connection.release();
