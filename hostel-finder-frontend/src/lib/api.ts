@@ -316,23 +316,44 @@ export const reviewApi = {
     rating: number,
     comment: string
   ): Promise<{ review: Review }> => {
-    const creds = getCredentials();
-    const response = await fetch(`${API_BASE_URL}/reviews`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        email: creds?.email,
-        password: creds?.password,
-        hostel_id: hostelId,
-        rating,
-        comment,
-      }),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to create review");
+    const url = `${API_BASE_URL}/reviews`;
+    console.log("🌐 Creating review for hostel:", hostelId, "rating:", rating);
+    
+    try {
+      const creds = getCredentials();
+      const response = await fetch(url, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          email: creds?.email,
+          password: creds?.password,
+          hostel_id: hostelId,
+          rating,
+          comment,
+        }),
+      });
+      
+      console.log("📡 Review response status:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Review error response:", errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { error: errorText || `Failed to create review (${response.status})` };
+        }
+        throw new Error(error.error || `Failed to create review (${response.status})`);
+      }
+      
+      const data = await response.json();
+      console.log("✅ Review created successfully:", data.review?.id);
+      return data;
+    } catch (error: any) {
+      console.error("❌ Fetch error in review.create:", error);
+      throw error;
     }
-    return response.json();
   },
 
   getByHostel: async (hostelId: number): Promise<Review[]> => {
@@ -412,24 +433,45 @@ export const enquiryApi = {
     message?: string,
     scheduledDate?: string
   ): Promise<{ enquiry: any }> => {
-    const creds = getCredentials();
-    const response = await fetch(`${API_BASE_URL}/enquiries`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        email: creds?.email,
-        password: creds?.password,
-        hostel_id: hostelId,
-        type,
-        message,
-        scheduled_date: scheduledDate,
-      }),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to send enquiry");
+    const url = `${API_BASE_URL}/enquiries`;
+    console.log("🌐 Creating enquiry for hostel:", hostelId, "type:", type);
+    
+    try {
+      const creds = getCredentials();
+      const response = await fetch(url, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          email: creds?.email,
+          password: creds?.password,
+          hostel_id: hostelId,
+          type,
+          message,
+          scheduled_date: scheduledDate,
+        }),
+      });
+      
+      console.log("📡 Enquiry response status:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Enquiry error response:", errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { error: errorText || `Failed to create enquiry (${response.status})` };
+        }
+        throw new Error(error.error || `Failed to send enquiry (${response.status})`);
+      }
+      
+      const data = await response.json();
+      console.log("✅ Enquiry created successfully:", data.enquiry?.id);
+      return data;
+    } catch (error: any) {
+      console.error("❌ Fetch error in enquiry.create:", error);
+      throw error;
     }
-    return response.json();
   },
 
   getByOwner: async (): Promise<Enquiry[]> => {
