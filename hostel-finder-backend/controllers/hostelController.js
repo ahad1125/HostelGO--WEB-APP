@@ -19,6 +19,11 @@ const Hostel = require("../models/hostel");
 const getAllHostels = async (req, res) => {
     const user = req.user; // Set by authenticate middleware
 
+    // Safety check
+    if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+    }
+
     try {
         const filters = {};
 
@@ -35,12 +40,16 @@ const getAllHostels = async (req, res) => {
         console.log("Getting hostels with filters:", filters, "for user:", user);
         const hostels = await Hostel.findAll(filters);
         console.log("Found", hostels.length, "hostels");
-        res.json(hostels);
+        
+        // Return empty array if no hostels (this is valid, not an error)
+        return res.json(hostels || []);
     } catch (err) {
         console.error("Error in getAllHostels:", err.message);
         console.error("Error code:", err.code);
         console.error("Error SQL state:", err.sqlState);
         console.error("Full error:", err);
+        console.error("User object:", user);
+        console.error("Stack trace:", err.stack);
         return res.status(500).json({
             error: "Database error",
             details: err.message,
