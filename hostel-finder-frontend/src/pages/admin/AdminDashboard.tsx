@@ -93,7 +93,7 @@ const AdminDashboard = () => {
     .slice(0, 5);
   const pendingBookingsCount = bookings.filter(b => b.status === 'pending').length;
 
-  const stats = [
+  const statCards = [
     { icon: Building2, label: "Total Hostels", value: allHostels.length, color: "text-primary" },
     { icon: CheckCircle, label: "Verified", value: verifiedCount, color: "text-accent" },
     { icon: Clock, label: "Pending Review", value: pendingCount, color: "text-yellow-500" },
@@ -145,7 +145,7 @@ const AdminDashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map((stat, index) => (
+        {statCards.map((stat, index) => (
           <Card key={index}>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
