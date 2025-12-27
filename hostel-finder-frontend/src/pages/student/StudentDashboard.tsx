@@ -8,6 +8,7 @@ import HostelCard, { Hostel as HostelCardType } from "@/components/HostelCard";
 import { hostelApi, Hostel as ApiHostel } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getHostelImage } from "@/utils/hostelImages";
 
 const StudentDashboard = () => {
   const [hostels, setHostels] = useState<HostelCardType[]>([]);
