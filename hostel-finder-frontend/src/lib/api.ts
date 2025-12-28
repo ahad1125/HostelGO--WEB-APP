@@ -655,7 +655,7 @@ export const bookingApi = {
 
   update: async (
     bookingId: number,
-    status: "pending" | "confirmed" | "cancelled"
+    status: "pending" | "owner_approved" | "confirmed" | "cancelled"
   ): Promise<{ booking: Booking }> => {
     const creds = getCredentials();
     const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
