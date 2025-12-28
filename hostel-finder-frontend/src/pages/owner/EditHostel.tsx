@@ -112,12 +112,52 @@ const EditHostel = () => {
       return;
     }
 
-    // Convert to base64
+    // Convert to base64 with compression
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      setFormData({ ...formData, image_url: base64String });
-      setImagePreview(base64String);
+      
+      // Compress image if it's too large (base64 can be huge)
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = (height * MAX_WIDTH) / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = (width * MAX_HEIGHT) / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with quality compression
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        
+        setFormData({ ...formData, image_url: compressedBase64 });
+        setImagePreview(compressedBase64);
+      };
+      img.onerror = () => {
+        toast({
+          title: "Upload failed",
+          description: "Failed to process the image file",
+          variant: "destructive",
+        });
+      };
+      img.src = base64String;
     };
     reader.onerror = () => {
       toast({

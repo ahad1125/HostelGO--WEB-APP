@@ -412,6 +412,11 @@ const updateHostel = async (req, res) => {
             updates.push("facilities = ?");
             values.push(facilities);
         }
+        if (image_url !== undefined) {
+            // Handle empty string as null
+            updates.push("image_url = ?");
+            values.push(image_url && image_url.trim() !== '' ? image_url : null);
+        }
 
         if (updates.length === 0) {
             return res.status(400).json({ error: "No fields to update" });

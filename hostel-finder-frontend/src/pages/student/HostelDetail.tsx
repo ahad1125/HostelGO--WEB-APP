@@ -365,11 +365,17 @@ const HostelDetail = () => {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Image Gallery */}
-          <div className="rounded-xl overflow-hidden border border-border">
+          <div className="rounded-xl overflow-hidden border border-border bg-muted">
             <img
               src={getHostelImage(hostel.id, hostel.image_url)}
               alt={hostel.name}
               className="w-full h-80 object-cover"
+              loading="lazy"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = `https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&auto=format&fit=crop&q=80`;
+                target.onerror = null; // Prevent infinite loop
+              }}
             />
           </div>
 

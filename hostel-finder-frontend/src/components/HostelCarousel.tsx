@@ -114,6 +114,12 @@ const HostelCarousel = ({ autoSlideInterval = 5000 }: HostelCarouselProps) => {
             src={getHostelImage(0)}
             alt="Modern hostel room"
             className="w-full h-80 object-cover"
+            loading="lazy"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = `https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&auto=format&fit=crop&q=80`;
+              target.onerror = null;
+            }}
           />
           <div className="p-6">
             <div className="flex items-center gap-2 mb-2">
@@ -157,6 +163,12 @@ const HostelCarousel = ({ autoSlideInterval = 5000 }: HostelCarouselProps) => {
                   src={getImage(hostel)}
                   alt={hostel.name}
                   className="w-full h-80 object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = `https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&auto=format&fit=crop&q=80`;
+                    target.onerror = null; // Prevent infinite loop
+                  }}
                 />
                 <div className="p-6">
                   <div className="flex items-center gap-2 mb-2">

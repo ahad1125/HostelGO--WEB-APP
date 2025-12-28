@@ -48,11 +48,18 @@ const HostelCard = ({
 }: HostelCardProps) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden bg-muted">
         <img
           src={hostel.image}
           alt={hostel.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+          onError={(e) => {
+            // Fallback to default image if error
+            const target = e.target as HTMLImageElement;
+            target.src = `https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&auto=format&fit=crop&q=80`;
+            target.onerror = null; // Prevent infinite loop
+          }}
         />
         {showVerificationBadge && (
           <div className="absolute top-3 right-3">
