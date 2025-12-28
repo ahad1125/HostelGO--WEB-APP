@@ -1,12 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#3b82f6" rx="10"/>
-  <rect x="20" y="40" width="60" height="50" fill="#ffffff" rx="2"/>
-  <rect x="30" y="50" width="8" height="8" fill="#3b82f6"/>
-  <rect x="45" y="50" width="8" height="8" fill="#3b82f6"/>
-  <rect x="62" y="50" width="8" height="8" fill="#3b82f6"/>
-  <rect x="30" y="65" width="8" height="8" fill="#3b82f6"/>
-  <rect x="45" y="65" width="8" height="8" fill="#3b82f6"/>
-  <rect x="62" y="65" width="8" height="8" fill="#3b82f6"/>
-  <polygon points="50,20 30,40 70,40" fill="#ffffff"/>
+  <!-- Light blue background with rounded corners -->
+  <rect width="100" height="100" rx="12" fill="#e0f2fe"/>
+  
+  <!-- Building/Hostel icon in blue -->
+  <g transform="translate(20, 25)">
+    <!-- Main building structure -->
+    <rect x="10" y="20" width="40" height="45" fill="#3b82f6" rx="2"/>
+    
+    <!-- Windows -->
+    <rect x="15" y="28" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="27" y="28" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="39" y="28" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="15" y="40" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="27" y="40" width="8" height="8" fill="#ffffff" rx="1"/>
+    <rect x="39" y="40" width="8" height="8" fill="#ffffff" rx="1"/>
+    
+    <!-- Door -->
+    <rect x="24" y="50" width="10" height="15" fill="#1e40af" rx="1"/>
+    
+    <!-- Roof -->
+    <polygon points="5,20 30,5 55,20" fill="#2563eb"/>
+    
+    <!-- Bed icon inside (representing hostel) -->
+    <g transform="translate(15, 30)">
+      <rect x="2" y="8" width="12" height="6" fill="#ffffff" rx="1"/>
+      <rect x="3" y="9" width="10" height="4" fill="#3b82f6" rx="0.5"/>
+    </g>
+  </g>
 </svg>
-

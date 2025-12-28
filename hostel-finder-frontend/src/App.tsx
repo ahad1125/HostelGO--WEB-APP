@@ -16,6 +16,7 @@ import StudentDashboard from "./pages/student/StudentDashboard";
 import HostelList from "./pages/student/HostelList";
 import HostelDetail from "./pages/student/HostelDetail";
 import StudentEnquiries from "./pages/student/StudentEnquiries";
+import MyHostel from "./pages/student/MyHostel";
 
 // Owner Pages
 import OwnerDashboard from "./pages/owner/OwnerDashboard";
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/student/dashboard" element={<StudentDashboard />} />
               <Route path="/student/hostels" element={<HostelList />} />
               <Route path="/student/hostel/:id" element={<HostelDetail />} />
+              <Route path="/student/my-hostel" element={<MyHostel />} />
               <Route path="/student/enquiries" element={<StudentEnquiries />} />
 
               {/* Owner Routes */}

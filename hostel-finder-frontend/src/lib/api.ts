@@ -585,7 +585,8 @@ export interface Booking {
   id: number;
   hostel_id: number;
   student_id: number;
-  status: "pending" | "confirmed" | "cancelled";
+  status: "pending" | "owner_approved" | "confirmed" | "cancelled";
+  created_at?: string;
   hostel_name?: string;
   hostel_address?: string;
   hostel_city?: string;
