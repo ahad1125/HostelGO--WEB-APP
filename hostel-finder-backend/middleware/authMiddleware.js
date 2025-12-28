@@ -32,8 +32,9 @@ const authenticate = async (req, res, next) => {
     }
 
     if (!email || !password) {
-        return res.status(400).json({ 
-            error: "Email and password required for authentication",
+        return res.status(401).json({ 
+            error: "Authentication required",
+            details: "Email and password required for authentication",
             hint: "Provide credentials via headers (X-User-Email, X-User-Password), query params, or request body"
         });
     }
@@ -47,15 +48,25 @@ const authenticate = async (req, res, next) => {
         }
 
         // Attach user info to request object (without password)
+        // Ensure all required fields are present
+        if (!user.id || !user.email || !user.role) {
+            console.error("❌ User data incomplete:", user);
+            return res.status(500).json({ error: "Invalid user data" });
+        }
+        
         req.user = {
             id: user.id,
-            name: user.name,
+            name: user.name || '',
             email: user.email,
             role: user.role
         };
         next();
     } catch (err) {
-        return res.status(500).json({ error: "Database error", details: err.message });
+        console.error("❌ Authentication error:", err.message);
+        return res.status(500).json({ 
+            error: "Authentication failed", 
+            details: err.message 
+        });
     }
 };
 

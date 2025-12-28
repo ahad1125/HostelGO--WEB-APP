@@ -49,13 +49,21 @@ export interface Review {
 
 // Get stored credentials
 const getCredentials = () => {
-  const user = localStorage.getItem("hostelgo_user");
-  if (!user) return null;
-  const parsed = JSON.parse(user);
-  return {
-    email: parsed.email,
-    password: localStorage.getItem("hostelgo_password") || "",
-  };
+  try {
+    const user = localStorage.getItem("hostelgo_user");
+    if (!user) return null;
+    const parsed = JSON.parse(user);
+    if (!parsed || !parsed.email) return null;
+    const password = localStorage.getItem("hostelgo_password") || "";
+    if (!password) return null;
+    return {
+      email: parsed.email,
+      password: password,
+    };
+  } catch (error) {
+    console.warn("Error reading credentials:", error);
+    return null;
+  }
 };
 
 // Helper to add auth headers

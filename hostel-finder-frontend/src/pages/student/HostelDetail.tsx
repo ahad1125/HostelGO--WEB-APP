@@ -91,6 +91,19 @@ const HostelDetail = () => {
     setIsLoading(true);
     try {
       console.log("🔄 HostelDetail: Fetching hostel ID:", id);
+      
+      // Check if user is logged in before making authenticated requests
+      const storedUser = localStorage.getItem('hostelgo_user');
+      if (!storedUser) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to view hostel details",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+      
       const [hostelData, reviewsData] = await Promise.all([
         hostelApi.getById(parseInt(id!)),
         reviewApi.getByHostel(parseInt(id!))
@@ -112,11 +125,25 @@ const HostelDetail = () => {
       }
     } catch (error: any) {
       console.error("❌ HostelDetail: Error fetching data:", error);
-      toast({
-        title: "Error loading hostel",
-        description: error.message || "Failed to fetch hostel details",
-        variant: "destructive",
-      });
+      
+      // Handle authentication errors
+      if (error.message?.includes('401') || error.message?.includes('Authentication') || error.message?.includes('credentials')) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to view hostel details",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+      // Don't show error toast if user is being redirected to login
+      if (!error.message?.includes('401') && !error.message?.includes('Authentication')) {
+        toast({
+          title: "Error loading hostel",
+          description: error.message || "Failed to fetch hostel details",
+          variant: "destructive",
+        });
+      }
       // Navigate back if hostel not found
       if (error.message?.includes("404") || error.message?.includes("not found")) {
         setTimeout(() => navigate("/student/hostels"), 2000);

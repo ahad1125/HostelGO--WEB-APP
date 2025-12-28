@@ -149,6 +149,12 @@ const searchHostels = async (req, res) => {
     const user = req.user;
     const { city, maxRent, facility, name } = req.query;
 
+    // Safety check
+    if (!user || !user.id || !user.role) {
+        console.error("❌ User not properly authenticated");
+        return res.status(401).json({ error: "Authentication required" });
+    }
+
     try {
         console.log("🔍 Searching hostels for user:", user.role, "filters:", { city, maxRent, facility, name });
         
@@ -229,6 +235,12 @@ const getHostelById = async (req, res) => {
     const hostelId = req.params.id;
 
     try {
+        // Safety check - user should always be set by authenticate middleware
+        if (!user || !user.id || !user.role) {
+            console.error("❌ User not properly authenticated");
+            return res.status(401).json({ error: "Authentication required" });
+        }
+        
         console.log("🔍 Getting hostel by ID:", hostelId, "for user:", user.role, user.id);
         
         // Use direct query for reliability (same pattern as other working endpoints)
