@@ -319,14 +319,38 @@ const createHostel = async (req, res) => {
         return res.status(400).json({ error: "Rent must be a positive number" });
     }
 
+    // Validate image_url length if provided (base64 can be very large)
+    // MySQL MEDIUMTEXT can hold up to 16MB, but we'll limit to 2MB base64 (~1.5MB original image) to be safe
+    // This allows for reasonable quality images while preventing abuse
+    const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+    if (image_url && image_url.length > MAX_IMAGE_SIZE) {
+        return res.status(400).json({ 
+            error: `Image is too large (${Math.round(image_url.length / 1024)}KB). Maximum allowed is 2MB. Please use a smaller image or upload via URL instead.` 
+        });
+    }
+
     try {
         console.log("🔍 Creating hostel by owner:", user.id);
-        console.log("📝 Hostel data:", { name, address, city, rent, facilities });
+        console.log("📝 Hostel data:", { name, address, city, rent, facilities, image_url_length: image_url ? image_url.length : 0 });
+        
+        // Process image_url - handle both base64 and URLs
+        let processedImageUrl = null;
+        if (image_url && image_url.trim() !== '') {
+            // If it's a base64 data URL, validate it
+            if (image_url.startsWith('data:image/')) {
+                processedImageUrl = image_url;
+            } else if (image_url.startsWith('http://') || image_url.startsWith('https://')) {
+                processedImageUrl = image_url;
+            } else {
+                // Invalid format, but we'll still try to save it
+                processedImageUrl = image_url;
+            }
+        }
         
         // Use direct query for reliability
         const [result] = await db.query(
             "INSERT INTO hostels (name, address, city, rent, facilities, owner_id, contact_number, is_verified, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [name, address, city, parseInt(rent), facilities || '', user.id, null, 0, image_url || null]
+            [name, address, city, parseInt(rent), facilities || '', user.id, null, 0, processedImageUrl]
         );
 
         const hostelId = result.insertId;
@@ -341,6 +365,14 @@ const createHostel = async (req, res) => {
             [hostelId]
         );
 
+        if (!hostelRows || hostelRows.length === 0) {
+            console.error("❌ Hostel was created but could not be retrieved:", hostelId);
+            return res.status(500).json({ 
+                error: "Hostel was created but could not be retrieved",
+                hostel_id: hostelId
+            });
+        }
+
         const hostel = hostelRows[0];
 
         console.log("✅ Hostel created successfully:", hostelId);
@@ -353,11 +385,22 @@ const createHostel = async (req, res) => {
         console.error("Error code:", err.code);
         console.error("Error SQL state:", err.sqlState);
         console.error("Stack:", err.stack);
+        console.error("Request body keys:", Object.keys(req.body));
+        
+        // Provide more specific error messages
+        let errorMessage = "Failed to create hostel";
+        if (err.code === 'ER_DATA_TOO_LONG') {
+            errorMessage = "Image data is too large. Please use a smaller image.";
+        } else if (err.code === 'ER_BAD_NULL_ERROR') {
+            errorMessage = "Required field is missing. Please check all required fields are filled.";
+        } else if (err.code === 'ER_NO_REFERENCED_ROW_2') {
+            errorMessage = "Invalid owner reference. Please log in again.";
+        }
+        
         return res.status(500).json({ 
-            error: "Failed to create hostel", 
-            details: err.message,
-            code: err.code,
-            sqlState: err.sqlState
+            error: errorMessage, 
+            details: process.env.NODE_ENV === 'development' ? err.message : undefined,
+            code: err.code
         });
     }
 };

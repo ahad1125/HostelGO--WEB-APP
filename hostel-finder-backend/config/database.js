@@ -84,16 +84,16 @@ async function initializeDatabase() {
         owner_id INT NOT NULL,
         contact_number VARCHAR(20),
         is_verified TINYINT(1) DEFAULT 0,
-        image_url TEXT,
+        image_url MEDIUMTEXT,
         FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
         
-        // Add image_url column if it doesn't exist (for existing databases)
+        // Add image_url column if it doesn't exist, or migrate TEXT to MEDIUMTEXT (for existing databases)
         try {
             // Check if column exists first
             const [columns] = await connection.query(`
-                SELECT COLUMN_NAME 
+                SELECT COLUMN_NAME, DATA_TYPE
                 FROM INFORMATION_SCHEMA.COLUMNS 
                 WHERE TABLE_SCHEMA = DATABASE() 
                 AND TABLE_NAME = 'hostels' 
@@ -101,11 +101,19 @@ async function initializeDatabase() {
             `);
             
             if (columns.length === 0) {
+                // Column doesn't exist, add it as MEDIUMTEXT
                 await connection.query(`
                     ALTER TABLE hostels 
-                    ADD COLUMN image_url TEXT
+                    ADD COLUMN image_url MEDIUMTEXT
                 `);
-                console.log("✅ Added image_url column to hostels table");
+                console.log("✅ Added image_url column to hostels table (MEDIUMTEXT)");
+            } else if (columns[0].DATA_TYPE === 'text') {
+                // Column exists as TEXT, upgrade to MEDIUMTEXT for larger images
+                await connection.query(`
+                    ALTER TABLE hostels 
+                    MODIFY COLUMN image_url MEDIUMTEXT
+                `);
+                console.log("✅ Upgraded image_url column from TEXT to MEDIUMTEXT");
             }
         } catch (err) {
             // Column might already exist or other error, log but don't fail

@@ -157,10 +157,24 @@ app.use((req, res) => {
 // Error Handler
 // =====================
 app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({
-        error: "Something went wrong",
-        details: err.message,
+    console.error("❌ Unhandled error:", err);
+    console.error("Error stack:", err.stack);
+    console.error("Request URL:", req.url);
+    console.error("Request method:", req.method);
+    
+    // If response was already sent, don't try to send again
+    if (res.headersSent) {
+        return next(err);
+    }
+    
+    // Provide more helpful error messages
+    const statusCode = err.statusCode || err.status || 500;
+    const errorMessage = err.message || "Something went wrong";
+    
+    res.status(statusCode).json({
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? err.message : undefined,
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
     });
 });
 

@@ -226,42 +226,74 @@ export const hostelApi = {
   create: async (
     hostel: Omit<Hostel, "id" | "owner_id" | "is_verified">
   ): Promise<{ hostel: Hostel }> => {
-    const creds = getCredentials();
-    const response = await fetch(`${API_BASE_URL}/hostels`, {
-      method: "POST",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        ...hostel,
-        email: creds?.email,
-        password: creds?.password,
-      }),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to create hostel");
+    const url = `${API_BASE_URL}/hostels`;
+    console.log("🌐 Creating hostel:", hostel.name);
+    
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(hostel),
+      });
+      
+      console.log("📡 Create hostel response status:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Error response:", errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { error: errorText || `Failed to create hostel (${response.status})` };
+        }
+        throw new Error(error.error || error.details || "Failed to create hostel");
+      }
+      
+      const data = await response.json();
+      console.log("✅ Hostel created successfully:", data.hostel?.id);
+      return data;
+    } catch (error: any) {
+      console.error("❌ Fetch error in hostel.create:", error);
+      throw error;
     }
-    return response.json();
   },
 
   update: async (
     id: number,
     hostel: Partial<Hostel>
   ): Promise<{ hostel: Hostel }> => {
-    const creds = getCredentials();
-    const response = await fetch(`${API_BASE_URL}/hostels/${id}`, {
-      method: "PUT",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        ...hostel,
-        email: creds?.email,
-        password: creds?.password,
-      }),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to update hostel");
+    const url = `${API_BASE_URL}/hostels/${id}`;
+    console.log("🌐 Updating hostel:", id);
+    
+    try {
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(hostel),
+      });
+      
+      console.log("📡 Update hostel response status:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Error response:", errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { error: errorText || `Failed to update hostel (${response.status})` };
+        }
+        throw new Error(error.error || error.details || "Failed to update hostel");
+      }
+      
+      const data = await response.json();
+      console.log("✅ Hostel updated successfully");
+      return data;
+    } catch (error: any) {
+      console.error("❌ Fetch error in hostel.update:", error);
+      throw error;
     }
-    return response.json();
   },
 
   delete: async (id: number): Promise<void> => {

@@ -62,11 +62,14 @@ const AddHostel = () => {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (max 5MB original file)
+    // Note: Images will be compressed to max 1200x800px and converted to JPEG at 0.7 quality
+    // This should result in files well under 2MB when base64 encoded
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "File too large",
-        description: "Please upload an image smaller than 5MB",
+        description: `Please upload an image smaller than ${MAX_FILE_SIZE / (1024 * 1024)}MB. The image will be automatically compressed.`,
         variant: "destructive",
       });
       return;
@@ -105,7 +108,18 @@ const AddHostel = () => {
         ctx?.drawImage(img, 0, 0, width, height);
         
         // Convert to base64 with quality compression
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        // Quality 0.6 provides good balance between file size and visual quality
+        // This should keep base64 size well under 2MB for most images
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+        
+        // Warn if compressed image is still large (over 1.5MB base64)
+        if (compressedBase64.length > 1.5 * 1024 * 1024) {
+          toast({
+            title: "Large image detected",
+            description: `Compressed image is ${Math.round(compressedBase64.length / 1024)}KB. Consider using a smaller or simpler image for better performance.`,
+            variant: "default",
+          });
+        }
         
         setFormData({ ...formData, image_url: compressedBase64 });
         setImagePreview(compressedBase64);
@@ -145,17 +159,49 @@ const AddHostel = () => {
       return;
     }
 
+    // Validate required fields
+    if (!formData.name.trim() || !formData.address.trim() || !formData.city || !formData.rent) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields (Hostel Name, City, Address, and Rent)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate rent is a valid number
+    const rentValue = parseInt(formData.rent);
+    if (isNaN(rentValue) || rentValue <= 0) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid rent amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      await hostelApi.create({
-        name: formData.name,
-        address: formData.address,
+      // Prepare the hostel data - only include image_url if it's provided and not empty
+      const hostelData: any = {
+        name: formData.name.trim(),
+        address: formData.address.trim(),
         city: formData.city,
-        rent: parseInt(formData.rent),
-        facilities: formData.facilities.join(', '),
-        image_url: formData.image_url && formData.image_url.trim() !== '' ? formData.image_url : undefined
-      });
+        rent: rentValue,
+        facilities: formData.facilities.length > 0 ? formData.facilities.join(', ') : '',
+      };
+
+      // Only add image_url if it's provided and not empty
+      if (formData.image_url && formData.image_url.trim() !== '') {
+        // Check if it's a valid base64 or URL
+        const trimmedUrl = formData.image_url.trim();
+        if (trimmedUrl.startsWith('data:image/') || trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
+          hostelData.image_url = trimmedUrl;
+        }
+      }
+
+      await hostelApi.create(hostelData);
       
       toast({
         title: "Hostel submitted!",
@@ -164,9 +210,10 @@ const AddHostel = () => {
       
       navigate("/owner/my-hostels");
     } catch (error: any) {
+      console.error("Error creating hostel:", error);
       toast({
         title: "Failed to add hostel",
-        description: error.message || "Please try again",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
