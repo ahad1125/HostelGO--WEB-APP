@@ -5,7 +5,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string, role: string) => Promise<void>;
+  signup: (name: string, email: string, password: string, role: string, contactNumber?: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -32,8 +32,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('hostelgo_password', password);
   };
 
-  const signup = async (name: string, email: string, password: string, role: string) => {
-    const response = await authApi.signup(name, email, password, role);
+  const signup = async (name: string, email: string, password: string, role: string, contactNumber?: string) => {
+    const response = await authApi.signup(name, email, password, role, contactNumber);
     const userData = { ...response.user, email };
     setUser(userData);
     localStorage.setItem('hostelgo_user', JSON.stringify(userData));

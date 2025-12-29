@@ -10,10 +10,10 @@ const User = require("../models/User");
 /**
  * Signup - Create a new user account
  * POST /auth/signup
- * Body: { name, email, password, role }
+ * Body: { name, email, password, role, contact_number }
  */
 const signup = async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, contact_number } = req.body;
 
     // Validate required fields
     if (!name || !email || !password || !role) {
@@ -38,7 +38,7 @@ const signup = async (req, res) => {
         }
 
         // Create new user (password stored as plain text for prototype)
-        const user = await User.create({ name, email, password, role });
+        const user = await User.create({ name, email, password, role, contact_number: contact_number || null });
 
         // Return success with user ID
         res.status(201).json({

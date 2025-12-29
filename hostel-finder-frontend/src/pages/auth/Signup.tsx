@@ -29,7 +29,8 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "" as UserRole | ""
+    role: "" as UserRole | "",
+    contactNumber: ""
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,7 +57,7 @@ const Signup = () => {
     setIsLoading(true);
     
     try {
-      await signup(formData.name, formData.email, formData.password, formData.role);
+      await signup(formData.name, formData.email, formData.password, formData.role, formData.contactNumber);
       
       toast({
         title: "Account created!",
@@ -151,6 +152,21 @@ const Signup = () => {
                 required
                 disabled={isLoading}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contactNumber">Contact Number</Label>
+              <Input
+                id="contactNumber"
+                type="tel"
+                placeholder="+92 300 1234567"
+                value={formData.contactNumber}
+                onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
+                disabled={isLoading}
+              />
+              <p className="text-xs text-muted-foreground">
+                Optional - Add your contact number for better communication
+              </p>
             </div>
 
             <div className="space-y-2">

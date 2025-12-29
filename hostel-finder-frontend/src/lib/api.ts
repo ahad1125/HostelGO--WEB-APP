@@ -86,12 +86,13 @@ export const authApi = {
     name: string,
     email: string,
     password: string,
-    role: string
+    role: string,
+    contactNumber?: string
   ): Promise<{ user: User }> => {
     const response = await fetch(`${API_BASE_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password, role, contact_number: contactNumber || null }),
     });
     if (!response.ok) {
       const error = await response.json();
