@@ -89,6 +89,27 @@ const AdminBookings = () => {
     }
   };
 
+  const handleCancelBooking = async (bookingId: number, studentName?: string, hostelName?: string) => {
+    if (!confirm(`Are you sure you want to cancel the booking for ${studentName || 'this student'} at ${hostelName || 'this hostel'}?`)) {
+      return;
+    }
+
+    try {
+      await bookingApi.update(bookingId, 'cancelled');
+      toast({
+        title: "Booking cancelled!",
+        description: "The booking has been successfully cancelled",
+      });
+      fetchBookings(); // Refresh the list
+    } catch (error: any) {
+      toast({
+        title: "Failed to cancel booking",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Group bookings by hostel
   const bookingsByHostel = bookings.reduce((acc, booking) => {
     const hostelId = booking.hostel_id;
@@ -287,6 +308,20 @@ const AdminBookings = () => {
                         {getStatusBadge(booking.status)}
                       </div>
                     </div>
+                    {/* Admin can cancel any active booking */}
+                    {booking.status !== 'cancelled' && (
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="gap-2"
+                          onClick={() => handleCancelBooking(booking.id, booking.student_name, booking.hostel_name)}
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Cancel Booking
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))
@@ -338,6 +373,15 @@ const AdminBookings = () => {
                         <CheckCircle className="h-4 w-4" />
                         Confirm Booking
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="gap-2"
+                        onClick={() => handleCancelBooking(booking.id, booking.student_name, booking.hostel_name)}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Cancel Booking
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -381,6 +425,20 @@ const AdminBookings = () => {
                       </div>
                       {getStatusBadge(booking.status)}
                     </div>
+                    {/* Show cancel button for confirmed bookings - admin can cancel any active booking */}
+                    {booking.status === 'confirmed' && (
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="gap-2"
+                          onClick={() => handleCancelBooking(booking.id, booking.student_name, booking.hostel_name)}
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Cancel Booking
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))
@@ -423,6 +481,20 @@ const AdminBookings = () => {
                       </div>
                       {getStatusBadge(booking.status)}
                     </div>
+                    {/* Admin can cancel pending bookings */}
+                    {booking.status === 'pending' && (
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="gap-2"
+                          onClick={() => handleCancelBooking(booking.id, booking.student_name, booking.hostel_name)}
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Cancel Booking
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))
@@ -486,6 +558,20 @@ const AdminBookings = () => {
                               </div>
                             )}
                           </div>
+                          {/* Admin can cancel bookings from this view too */}
+                          {booking.status !== 'cancelled' && (
+                            <div className="mt-2">
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                className="gap-2"
+                                onClick={() => handleCancelBooking(booking.id, booking.student_name, hostelGroup.hostel_name)}
+                              >
+                                <XCircle className="h-3 w-3" />
+                                Cancel
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

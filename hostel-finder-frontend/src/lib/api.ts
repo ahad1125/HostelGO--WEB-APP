@@ -700,21 +700,37 @@ export const bookingApi = {
     bookingId: number,
     status: "pending" | "owner_approved" | "confirmed" | "cancelled"
   ): Promise<{ booking: Booking }> => {
-    const creds = getCredentials();
-    const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
-      method: "PUT",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        email: creds?.email,
-        password: creds?.password,
-        status,
-      }),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to update booking");
+    const url = `${API_BASE_URL}/bookings/${bookingId}`;
+    console.log("🌐 Updating booking:", bookingId, "status:", status);
+    
+    try {
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status }),
+      });
+      
+      console.log("📡 Update booking response status:", response.status, response.statusText);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Error response:", errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { error: errorText || `Failed to update booking (${response.status})` };
+        }
+        throw new Error(error.error || error.details || "Failed to update booking");
+      }
+      
+      const data = await response.json();
+      console.log("✅ Booking updated successfully");
+      return data;
+    } catch (error: any) {
+      console.error("❌ Fetch error in booking.update:", error);
+      throw error;
     }
-    return response.json();
   },
 
   delete: async (bookingId: number): Promise<void> => {
