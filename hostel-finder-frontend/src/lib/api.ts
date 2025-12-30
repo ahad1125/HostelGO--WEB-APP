@@ -231,14 +231,14 @@ export const hostelApi = {
     
     try {
       const response = await fetch(url, {
-        method: "POST",
-        headers: getAuthHeaders(),
+      method: "POST",
+      headers: getAuthHeaders(),
         body: JSON.stringify(hostel),
       });
       
       console.log("📡 Create hostel response status:", response.status, response.statusText);
       
-      if (!response.ok) {
+    if (!response.ok) {
         const errorText = await response.text();
         console.error("❌ Error response:", errorText);
         let error;
@@ -248,7 +248,7 @@ export const hostelApi = {
           error = { error: errorText || `Failed to create hostel (${response.status})` };
         }
         throw new Error(error.error || error.details || "Failed to create hostel");
-      }
+    }
       
       const data = await response.json();
       console.log("✅ Hostel created successfully:", data.hostel?.id);
@@ -268,14 +268,14 @@ export const hostelApi = {
     
     try {
       const response = await fetch(url, {
-        method: "PUT",
-        headers: getAuthHeaders(),
+      method: "PUT",
+      headers: getAuthHeaders(),
         body: JSON.stringify(hostel),
       });
       
       console.log("📡 Update hostel response status:", response.status, response.statusText);
       
-      if (!response.ok) {
+    if (!response.ok) {
         const errorText = await response.text();
         console.error("❌ Error response:", errorText);
         let error;
@@ -285,7 +285,7 @@ export const hostelApi = {
           error = { error: errorText || `Failed to update hostel (${response.status})` };
         }
         throw new Error(error.error || error.details || "Failed to update hostel");
-      }
+    }
       
       const data = await response.json();
       console.log("✅ Hostel updated successfully");
